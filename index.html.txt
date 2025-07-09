@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Meme!</title>
+    <!-- This file contains all the code to show random memes -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background: #1a1a1a;
+            color: white;
+            font-family: Arial, sans-serif;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        
+        #loading {
+            font-size: 24px;
+            animation: pulse 1s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        #meme-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+        }
+        
+        #meme-image {
+            max-width: 100%;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        #meme-title {
+            margin-top: 10px;
+            font-size: 16px;
+            text-align: center;
+            padding: 0 20px;
+            max-width: 90%;
+            opacity: 0.9;
+        }
+        
+        #error {
+            color: #ff6b6b;
+            font-size: 18px;
+            text-align: center;
+            padding: 20px;
+            display: none;
+        }
+        
+        #refresh-btn {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+        }
+        
+        #refresh-btn:active {
+            transform: scale(0.95);
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">Loading meme... 😄</div>
+    <div id="error">Oops! Couldn't load meme. Check your internet!</div>
+    <div id="meme-container" style="display: none;">
+        <img id="meme-image" alt="Random meme">
+        <p id="meme-title"></p>
+    </div>
+    <button id="refresh-btn" onclick="loadMeme()" title="New meme!">🔄</button>
+    
+    <script>
+        // Change this to use a different subreddit
+        // For kid-safe memes, use: https://meme-api.com/gimme/wholesomememes
+        // Alternative API: https://meme-api.herokuapp.com/gimme
+        const MEME_API_URL = 'https://meme-api.com/gimme';
+        
+        async function loadMeme() {
+            // Hide everything and show loading
+            document.getElementById('meme-container').style.display = 'none';
+            document.getElementById('error').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+            
+            try {
+                const response = await fetch(MEME_API_URL);
+                const data = await response.json();
+                
+                if (data.url) {
+                    const img = document.getElementById('meme-image');
+                    const title = document.getElementById('meme-title');
+                    
+                    // Load the image
+                    img.onload = () => {
+                        document.getElementById('loading').style.display = 'none';
+                        document.getElementById('meme-container').style.display = 'flex';
+                    };
+                    
+                    img.onerror = () => {
+                        showError();
+                    };
+                    
+                    img.src = data.url;
+                    title.textContent = data.title || 'Random Meme';
+                } else {
+                    showError();
+                }
+            } catch (error) {
+                console.error('Error loading meme:', error);
+                showError();
+            }
+        }
+        
+        function showError() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('meme-container').style.display = 'none';
+            document.getElementById('error').style.display = 'block';
+        }
+        
+        // Load a meme when the page loads
+        loadMeme();
+        
+        // Reload meme every 30 seconds (optional)
+        // setInterval(loadMeme, 30000);
+    </script>
+</body>
+</html>
